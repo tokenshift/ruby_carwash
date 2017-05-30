@@ -1,6 +1,8 @@
 require "spec_helper"
 
 RSpec.describe Carwash::Scrubber do
+  let(:scrubber) { Carwash::Scrubber.new }
+
   describe "#scrub_stream" do
     it "learns from and scrubs a stream of text" do
       input = StringIO.new <<-EOS
@@ -31,8 +33,6 @@ RSpec.describe Carwash::Scrubber do
   end
 
   describe "#scrub" do
-    let(:scrubber) { Carwash::Scrubber.new }
-
     it "obscures values in Dockerfile `ENV foo bar` format" do
       expect(scrubber.scrub("ENV password something"))
         .to eq "ENV password ********"
@@ -62,6 +62,15 @@ RSpec.describe Carwash::Scrubber do
           other_config=not-secret
       EOS
       .strip
+    end
+
+    it "obscures sensitive values found in env vars by default" do
+      ENV["MY_SUPER_SECRET_PASSWORD"] = "this_is_a_test"
+
+      scrubber = Carwash::Scrubber.new
+
+      expect(scrubber.scrub("Logging this_is_a_test"))
+        .to eq "Logging ********"
     end
   end
 end

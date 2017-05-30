@@ -11,7 +11,8 @@ class Carwash::Scrubber
 
   def initialize(sensitive_keys: DEFAULT_SENSITIVE_KEYS,
                  obscure_with: DEFAULT_OBSCURE_WITH,
-                 check_for_rails: true)
+                 check_for_rails: true,
+                 check_env_vars: true)
     @obscure_with = obscure_with
 
     @sensitive_keys = Set.new(sensitive_keys.map(&:to_s).map(&:downcase))
@@ -21,6 +22,16 @@ class Carwash::Scrubber
       @sensitive_keys += Rails.configuration.filter_parameters.map(&:to_s).map(&:downcase).compact
       @sensitive_keys += Rails.application.secrets.keys.map(&:to_s).map(&:downcase).compact
       @sensitive_vals += Rails.application.secrets.values.map(&:to_s).map(&:downcase).compact
+    end
+
+    if check_env_vars
+      ENV.each do |env_key, env_val|
+        @sensitive_keys.each do |key|
+          if env_key =~ %r{[_-]?#{key}}i
+            @sensitive_vals.add env_val.downcase
+          end
+        end
+      end
     end
   end
 
