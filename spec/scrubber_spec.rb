@@ -14,11 +14,15 @@ RSpec.describe Carwash::Scrubber do
       Just make sure nobody knows the super_secret password!
       Or the dbpassword. That would be bad.
       EOS
+      .strip
 
       scrubber = Carwash::Scrubber.new
 
+      p scrubber.instance_variable_get("@sensitive_vals").to_a
+
       output = StringIO.new
       scrubber.scrub_stream(input, output)
+      p scrubber.instance_variable_get("@sensitive_vals").to_a
 
       output.rewind
       result = output.read
@@ -44,7 +48,7 @@ RSpec.describe Carwash::Scrubber do
     end
 
     it "obscures values in a multiline Dockerfile `ENV` statement" do
-      input = <<~EOS
+      input = <<-EOS
       ENV password=something
           secret_key=another_thing
           api_token=dontsharethis
@@ -55,7 +59,7 @@ RSpec.describe Carwash::Scrubber do
         scrubber.scrub(line)
       }.join("\n").strip
 
-      expect(result).to eq <<~EOS
+      expect(result).to eq <<-EOS
       ENV password=********
           secret_key=********
           api_token=********

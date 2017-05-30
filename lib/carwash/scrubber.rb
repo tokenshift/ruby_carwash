@@ -4,7 +4,7 @@ require "set"
 # obscures them in lines of text.
 class Carwash::Scrubber
   DEFAULT_OBSCURE_WITH   = "********"
-  DEFAULT_SENSITIVE_KEYS = %w[key password secret token]
+  DEFAULT_SENSITIVE_KEYS = %w[key password token]
 
   attr_accessor :obscure_with
   attr_reader :sensitive_keys
