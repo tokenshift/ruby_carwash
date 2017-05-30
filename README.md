@@ -1,8 +1,17 @@
 # Carwash
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/carwash`. To experiment with that code, run `bin/console` for an interactive prompt.
+Log sanitizer. Obscures passwords and other potentially sensitive values in log
+entries.
 
-TODO: Delete this and the text above, and describe your gem
+## Features
+
+* Learns potentially sensitive values by looking for keys like "PASSWORD" and
+  "TOKEN", then obscures them wherever they subsequently occur.
+* Seeds the list of sensitive values from environment variables and Rails'
+  `secrets.yml`.
+* Additional sensitive keys and values can be added as needed, if you have
+  a known source of secured config values that could potentially end up
+  (accidentally) showing up in logs.
 
 ## Installation
 
@@ -22,15 +31,22 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+scrubber = Carwash::Scrubber.new
 
-## Development
+scrubber.add_sensitive_key("CERT")
+scrubber.add_sensitive_value("P@ssw0rd")
+scrubber.add_sensitive_value("mysecret")
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+log_lines.each do |line|
+  puts scrubber.scrub(line)
+end
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Or to scrub an entire input stream line by line and print it to stdout:
 
-## Contributing
+```
+scrubber.scrub_stream(input_stream, STDOUT)
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/carwash.
-
+See `Carwash::Scrubber` for the rest of the API.

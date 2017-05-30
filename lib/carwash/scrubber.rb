@@ -4,7 +4,7 @@ require "set"
 # obscures them in lines of text.
 class Carwash::Scrubber
   DEFAULT_OBSCURE_WITH   = "********"
-  DEFAULT_SENSITIVE_KEYS = %w[key password token]
+  DEFAULT_SENSITIVE_KEYS = %w[key password secret token]
 
   attr_accessor :obscure_with
   attr_reader :sensitive_keys
@@ -40,6 +40,12 @@ class Carwash::Scrubber
   # discovery.
   def add_sensitive_value(value)
     @sensitive_vals.add(value.to_s.downcase)
+  end
+
+  # Adds a string to the list of sensitive keys, to be used when learning new
+  # values to be obscured.
+  def add_sensitive_key(key)
+    @sensitive_keys.add(key.to_s.downcase)
   end
 
   # Look for sensitive keys in a line of text and "learn" the associated
