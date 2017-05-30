@@ -8,6 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Carwash::VERSION
   spec.authors       = ["Nathan Clark"]
   spec.email         = ["nathan.clark@tokenshift.com"]
+  spec.license       = "MIT"
 
   spec.summary       = %q{Scrubs potentially sensitive values from log entries.}
   spec.homepage      = "http://github.com/tokenshift/ruby_carwash"
