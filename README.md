@@ -49,4 +49,4 @@ Or to scrub an entire input stream line by line and print it to stdout:
 scrubber.scrub_stream(input_stream, STDOUT)
 ```
 
-See [http://www.rubydoc.info/gems/carwash/Carwash/Scrubber](Carwash::Scrubber) for the rest of the API.
+See `Carwash::Scrubber` for the rest of the API.
