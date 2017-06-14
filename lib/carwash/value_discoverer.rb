@@ -2,14 +2,11 @@
 # values.
 #
 # Looks for the following patterns of key-value pairs:
-# KEY=value
-# KEY='value'
-# KEY="value"
-# KEY value
-# KEY 'value'
-# KEY "value"
-# KEY: value
-# KEY => value
+# * KEY=value
+# * KEY value
+# * KEY: value
+# * KEY => value
+# Where the value may be single or double quoted.
 class Carwash::ValueDiscoverer < Struct.new(:key)
   ESCAPE_CHARACTERS = {
     "\\0" => "\0",
