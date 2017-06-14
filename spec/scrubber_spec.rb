@@ -82,5 +82,11 @@ RSpec.describe Carwash::Scrubber do
       expect(scrubber.scrub("Logging       "))
         .not_to include "****"
     end
+
+    it "scrubs values embedded in json strings" do
+      # Example from Docker API output
+      input = '{"stream":"ENV MY_PASSWORD some_secret_thing\n"}'
+      expect(scrubber.scrub(input)).not_to include "some_secret_thing"
+    end
   end
 end

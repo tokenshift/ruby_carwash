@@ -122,5 +122,9 @@ RSpec.describe Carwash::ValueDiscoverer do
     it "unescapes multiple escaped quotes" do
       expect(discoverer.unescape_value("\\\"testing\\\"")).to eq "\"testing\""
     end
+
+    it "recognizes common escape characters" do
+      expect(discoverer.unescape_value("my_password\\n")).to eq "my_password\n"
+    end
   end
 end

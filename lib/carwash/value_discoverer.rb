@@ -11,6 +11,17 @@
 # KEY: value
 # KEY => value
 class Carwash::ValueDiscoverer < Struct.new(:key)
+  ESCAPE_CHARACTERS = {
+    "\\0" => "\0",
+    "\\a" => "\a",
+    "\\b" => "\b",
+    "\\f" => "\f",
+    "\\n" => "\n",
+    "\\r" => "\r",
+    "\\t" => "\t",
+    "\\v" => "\v",
+  }
+
   def discover(line)
     patterns.flat_map { |pattern|
       line.scan(pattern).map(&:first)
@@ -28,6 +39,8 @@ class Carwash::ValueDiscoverer < Struct.new(:key)
   end
 
   def unescape_value(value)
-    value.gsub(/\\(.)/) { $1 }
+    value.gsub(/\\(.)/) { |match|
+      ESCAPE_CHARACTERS.fetch(match, $1)
+    }
   end
 end
