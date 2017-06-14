@@ -18,11 +18,8 @@ RSpec.describe Carwash::Scrubber do
 
       scrubber = Carwash::Scrubber.new
 
-      p scrubber.instance_variable_get("@sensitive_vals").to_a
-
       output = StringIO.new
       scrubber.scrub_stream(input, output)
-      p scrubber.instance_variable_get("@sensitive_vals").to_a
 
       output.rewind
       result = output.read
@@ -75,6 +72,15 @@ RSpec.describe Carwash::Scrubber do
 
       expect(scrubber.scrub("Logging this_is_a_test"))
         .to eq "Logging ********"
+    end
+
+    it "ignores empty values" do
+      ENV["THE_NUCLEAR_LAUNCH_PASSWORD"] = "   "
+
+      scrubber = Carwash::Scrubber.new
+
+      expect(scrubber.scrub("Logging       "))
+        .not_to include "****"
     end
   end
 end

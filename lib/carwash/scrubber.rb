@@ -18,18 +18,28 @@ class Carwash::Scrubber
     @sensitive_keys = Set.new(sensitive_keys.map(&:to_s).map(&:downcase))
     @sensitive_vals = Set.new
 
-    if check_for_rails && defined? Rails
-      @sensitive_keys += Rails.configuration.filter_parameters.map(&:to_s).map(&:downcase).compact
-      @sensitive_keys += Rails.application.secrets.keys.map(&:to_s).map(&:downcase).compact
-      @sensitive_vals += Rails.application.secrets.values.map(&:to_s).map(&:downcase).compact
-    end
+    add_rails_secrets if check_for_rails && defined? Rails
 
-    if check_env_vars
-      ENV.each do |env_key, env_val|
-        @sensitive_keys.each do |key|
-          if env_key =~ %r{[_-]?#{key}}i
-            @sensitive_vals.add env_val.downcase
-          end
+    add_env_values if check_env_vars
+  end
+
+  # Adds keys and values from Rails' secrets.yml and filter_parameters.
+  def add_rails_secrets
+    @sensitive_keys += Rails.configuration.filter_parameters.map(&:to_s).map(&:downcase).compact
+    @sensitive_keys += Rails.application.secrets.keys.map(&:to_s).map(&:downcase).compact
+
+    Rails.application.secrets.values.each do |secret|
+      add_sensitive_value(secret)
+    end
+  end
+
+  # Adds sensitive values (as determined by the existing set of sensitive keys)
+  # found in environment variables.
+  def add_env_values
+    ENV.each do |env_key, env_val|
+      @sensitive_keys.each do |key|
+        if env_key =~ %r{[_-]?#{key}}i
+          add_sensitive_value(env_val)
         end
       end
     end
@@ -39,7 +49,10 @@ class Carwash::Scrubber
   # passwords/keys that are known at startup time, without relying on value
   # discovery.
   def add_sensitive_value(value)
-    @sensitive_vals.add(value.to_s.downcase)
+    value = value.to_s.downcase.strip
+    if !value.empty?
+      @sensitive_vals.add(value.to_s.downcase)
+    end
   end
 
   # Adds a string to the list of sensitive keys, to be used when learning new
@@ -54,7 +67,9 @@ class Carwash::Scrubber
   # known sensitive values.
   def discover_sensitive_values(line)
     value_discoverers.each do |discoverer|
-      @sensitive_vals += discoverer.discover(line).map(&:to_s).map(&:downcase)
+      discoverer.discover(line).each do |value|
+        add_sensitive_value(value)
+      end
     end
   end
 

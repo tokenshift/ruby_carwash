@@ -85,13 +85,12 @@ RSpec.describe Carwash::ValueDiscoverer do
     end
 
     it "finds multiple entries in a single line" do
-      config = {
-        some_password: "testing1",
-        another_password: "testing2",
-        something_else: "testing3"
-      }
+      input = <<-EOS
+      This is a log line: { :some_password => "testing1",
+                            :another_password => "testing2",
+                            :something_else   => "testing3" }
+      EOS
 
-      input = "This is a log line: #{config.to_json}"
       expect(discoverer.discover(input)).to include "testing1"
       expect(discoverer.discover(input)).to include "testing2"
       expect(discoverer.discover(input)).not_to include "testing3"
@@ -106,6 +105,16 @@ RSpec.describe Carwash::ValueDiscoverer do
 
       input = "pAsSwOrD=testing"
       expect(discoverer.discover(input)).to include "testing"
+    end
+
+    it "finds values in Dockerfile `ENV foo bar` format" do
+      input = "ENV password super_secret"
+      expect(discoverer.discover(input)).to include "super_secret"
+    end
+
+    it "finds values in Dockerfile `ENV foo=bar` format" do
+      input = "ENV password=another_secret"
+      expect(discoverer.discover(input)).to include "another_secret"
     end
   end
 
