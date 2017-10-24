@@ -1,5 +1,7 @@
 # Carwash
 
+[![CircleCI](https://circleci.com/gh/tokenshift/ruby_carwash.svg?style=svg)](https://circleci.com/gh/tokenshift/ruby_carwash)
+
 Log sanitizer. Obscures passwords and other potentially sensitive values in log
 entries.
 
