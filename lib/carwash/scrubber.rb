@@ -88,7 +88,7 @@ class Carwash::Scrubber
   # detected. Makes replacements in place.
   def obscure_sensitive_values!(line, obscure_with: self.obscure_with)
     @sensitive_vals.each do |val|
-      line.gsub!(val, obscure_with)
+      line.gsub!(/#{val}/i, obscure_with)   
     end
   end
 
