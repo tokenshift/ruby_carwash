@@ -31,6 +31,36 @@ RSpec.describe Carwash::Scrubber do
       expect(result).to include "the ******** password"
       expect(result).to include "Or the ********."
     end
+
+    it "scrubs values regardless of case" do
+      input = StringIO.new <<-EOS
+      This is a test.
+      Config:
+      PASSWORD=SuPeR_SeCrEt
+      DATABASE_URL=postgres://dbuser:DbPassword123@dbhost:5432/testing
+      Doing some more stuff
+      Just make sure nobody knows the super_secret (or super_SECRET) password!
+      Or the dbpassword123 (or DBPASSWORD123). That would be bad.
+      EOS
+      .strip
+
+      scrubber = Carwash::Scrubber.new
+
+      output = StringIO.new
+      scrubber.scrub_stream(input, output)
+
+      output.rewind
+      result = output.read
+
+      expect(result).not_to include "super_secret"
+      expect(result).not_to include "SuPeR_SeCrEt"
+      expect(result).not_to include "dbpassword"
+      expect(result).not_to include "DBPASSWORD"
+      expect(result).to include "PASSWORD=********"
+      expect(result).to include "dbuser:********@dbhost"
+      expect(result).to include "the ******** (or ********) password"
+      expect(result).to include "Or the ******** (or ********)."
+    end
   end
 
   describe "#scrub" do
